@@ -30,12 +30,12 @@ def find_trigger_index(df):
             df_trigger_index = df_trigger_index.append({'Index':i}, ignore_index=True)
     return df_trigger_index
 
-def train_LDA(data_path, names, n_components=1):
+def train_LDA(data_path, names, n_components=1, test_size=0.2, random_state=0):
     dataset = pd.read_csv(data_path, names)
     X = dataset.iloc[:, 0:len(names) - 1]
     Y = dataset.iloc[:,len(names)]
 
-    X_train, X_test, Y_train, Y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+    X_train, X_test, Y_train, Y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
 
     sc = StandardScaler()
     X_train = sc.fittransform(X_train)
@@ -60,7 +60,7 @@ def train_RandomForest(data_path, names, max_depth=2, random_state=0):
     print(cm)
     print('Accuracy:' + str(accuracy_score(Y_test, Y_pred)))
 
-    return(
+    return 
 
 
 
