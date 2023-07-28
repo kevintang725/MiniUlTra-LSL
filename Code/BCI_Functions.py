@@ -11,6 +11,9 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 
+# --------------------------------------------------------------------------------------------------------------
+# Sliding Window Moving Averages
+# --------------------------------------------------------------------------------------------------------------
 def simple_moving_average(df, window_size=5):
     moving_average = df['column_name'].rolling(window_size).mean()
     return moving_average
@@ -30,6 +33,9 @@ def find_trigger_index(df):
             df_trigger_index = df_trigger_index.append({'Index':i}, ignore_index=True)
     return df_trigger_index
 
+# --------------------------------------------------------------------------------------------------------------
+# Classifiers
+# --------------------------------------------------------------------------------------------------------------
 def train_LDA(data_path, names, n_components=1, test_size=0.2, random_state=0):
     dataset = pd.read_csv(data_path, names)
     X = dataset.iloc[:, 0:len(names) - 1]
@@ -44,6 +50,13 @@ def train_LDA(data_path, names, n_components=1, test_size=0.2, random_state=0):
     lda = LDA(n_components=n_components)
     X_train = lda.fit_transform(X_train, Y_train)
     X_test = lda.transform(X_test)
+    Y_pred = lda.predict(X_test)
+    
+    cm = confusion_matrix(Y_test, Y_pred)
+    print(cm)
+    print('Accuracy:' + str(accuracy_score(Y_test, Y_pred)))
+
+    return lda
 
 def train_RandomForest(data_path, names, max_depth=2, random_state=0):
     dataset = pd.read_csv(data_path, names)
@@ -52,15 +65,15 @@ def train_RandomForest(data_path, names, max_depth=2, random_state=0):
 
     X_train, X_test, Y_train, Y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
-    classifier = RandomForestClassifier(max_depth=max_depth, random_state=random_state)
-    classifier.fit(X_train, Y_train)
-    Y_pred = classifier.predict(X_test)
+    RF = RandomForestClassifier(max_depth=max_depth, random_state=random_state)
+    RF.fit(X_train, Y_train)
+    Y_pred = RF.predict(X_test)
 
     cm = confusion_matrix(Y_test, Y_pred)
     print(cm)
     print('Accuracy:' + str(accuracy_score(Y_test, Y_pred)))
 
-    return 
+    return RF
 
 
 
