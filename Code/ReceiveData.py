@@ -40,7 +40,7 @@ def main():
         df = df.append({'time':timestamp, 'data':sample}, ignore_index=True)
         #df = pd.concat([df, pd.DataFrame({'time':timestamp, 'data':sample})],ignore_index=False)
         
-        # calculate simple moving average to the dataframe
+        # calculate  moving average to the dataframe
         moving_average = BCI_Functions.simple_moving_average(df_moving_average)
         # append moving average to the dataframe
         df_moving_average = df_moving_average.append({'Moving Average', moving_average},ignore_index=True)
