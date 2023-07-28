@@ -1,0 +1,17 @@
+/dist/
+/.idea/
+/pylsl.egg-info/
+/build/
+__pycache__
+*.so
+*.so.*
+*.pyc
+*.dll
+*.dylib
+*.cprof
+*.png
+/wheelhouse/
+/pylsl/include
+/pylsl/lib
+/pylsl/share
+.DS_Store
