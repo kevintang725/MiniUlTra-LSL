@@ -41,9 +41,9 @@ def main():
         #df = pd.concat([df, pd.DataFrame({'time':timestamp, 'data':sample})],ignore_index=False)
         
         # calculate  moving average to the dataframe
-        moving_average = BCI_Functions.simple_moving_average(df_moving_average)
+        #moving_average = BCI_Functions.simple_moving_average(df_moving_average)
         # append moving average to the dataframe
-        df_moving_average = df_moving_average.append({'Moving Average', moving_average},ignore_index=True)
+        #df_moving_average = df_moving_average.append({'Moving Average', moving_average},ignore_index=True)
 
         # Check if recorded time has reached user input's total time desired
         if elapsed_time > int(trial_duration):
