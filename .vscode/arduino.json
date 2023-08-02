@@ -1,0 +1,7 @@
+{
+    "configuration": "cpu=atmega2560",
+    "board": "arduino:avr:mega",
+    "port": "COM3",
+    "programmer": "avrisp",
+    "sketch": "Arduino\\Legon_et_al_2014_v2\\Legon_et_al_2014_v2.ino"
+}
