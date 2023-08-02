@@ -1,6 +1,7 @@
 // pin definitions
 int triggerPin_FUS = 12;
 int triggerPin_FES = 13;
+int triggerPin_FUStoLSL = 11;
 
 // for incoming serial data
 int incomingByte = 0; 
@@ -24,6 +25,8 @@ void setup()
   pinMode(triggerPin_FUS, OUTPUT);
   digitalWrite(triggerPin_FES, LOW);
   pinMode(triggerPin_FES, OUTPUT);
+  digitalWrite(triggerPin_FUStoLSL, LOW);
+  pinMode(triggerPin_FUStoLSL, OUTPUT);
 
   Serial.println("Press 1 to begin paradigm, Press 0 to stop paradigm");
 }
@@ -60,13 +63,15 @@ void loop()
 
   while (start_flag == 1){
       // Pulse Triggers for FUS
-      digitalWrite(triggerPin_FUS, HIGH);  
+      digitalWrite(triggerPin_FUS, HIGH);
+      digitalWrite(triggerPin_FUStoLSL, HIGH);  
       Serial.print('1');
       Serial.print('\n');
 
       delay(rest_period);
 
       digitalWrite(triggerPin_FUS, LOW);  
+      digitalWrite(triggerPin_FUStoLSL, LOW);  
       Serial.print('0');
       Serial.print('\n');
 
