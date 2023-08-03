@@ -33,7 +33,7 @@ void setup()
   digitalWrite(triggerPin_FUStoLSL, LOW);
   pinMode(triggerPin_FUStoLSL, OUTPUT);
 
-  Serial.println("Press 1 to begin paradigm, Press 0 to stop paradigm");
+  Serial.println("Press 1 to begin paradigm, Press CTRL+C to stop paradigm");
 }
 
 void loop()
@@ -53,6 +53,7 @@ void loop()
       delay(1000);
       Serial.println("1");
       delay(1000);
+      Serial.println("------------------------ : Start ");
     }
   }
 
@@ -68,7 +69,7 @@ void loop()
 
       // Pulse Triggers ON for FES 
       digitalWrite(triggerPin_FES,HIGH);
-      digitalWrite(triggerPin_FEStoLSL);
+      digitalWrite(triggerPin_FEStoLSL, HIGH);
 
       // Wait for elapsed total OFF cycle
       delay(rest_period - FES_delay);
