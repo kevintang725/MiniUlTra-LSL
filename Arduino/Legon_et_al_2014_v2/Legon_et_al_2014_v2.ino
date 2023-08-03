@@ -1,21 +1,26 @@
-// pin definitions
+// Central Microprocessor for Stimulation Paradigms and Trigger Controls
+// Author: Kai Wing Kevin Tang, 2023
+
+// Pin definitions
 int triggerPin_FUS = 12;
 int triggerPin_FES = 13;
 int triggerPin_FUStoLSL = 11;
+int triggerPin_FEStoLSL = 10;
 
-// for incoming serial data
+// Serial I/O Communication
 int incomingByte = 0; 
 int start_flag = 0;
 
-
-// stimulation paradigm
+// Stimulation Paradigm
 const unsigned long stimulation_period = 500; 
 const unsigned long rest_period = 500; 
+const unsigned long FES_delay = 100;
+const unsigned long epoch_rest = 1000;
+
+// Global Variables
 unsigned long StartOfInterval;
-unsigned long  time;
 unsigned long elapsed_rest;
 unsigned long elapsed_epoch = 0;
-const unsigned long epoch_rest = 1000;
 
 
 void setup()
@@ -42,36 +47,37 @@ void loop()
       start_flag = 1;
       Serial.println("Stimulation beginning in 10 seconds...");
       delay(10000);
-      //Serial.println("Stimulation beginning in 3 seconds...");
       Serial.println("3");
       delay(1000);
       Serial.println("2");
       delay(1000);
       Serial.println("1");
       delay(1000);
-      time = millis();
     }
   }
 
-  /*
-  // Check if 100ms has passed since start of FUS, if so begin FES (Median Nerve Stimulation)
-    if ((millis() - time) > 100){
-      digitalWrite(triggerPin_FES, HIGH);
-    }
-  */
-
-
   while (start_flag == 1){
-      // Pulse Triggers for FUS
+      // Pulse Triggers ON for FUS
       digitalWrite(triggerPin_FUS, HIGH);
-      digitalWrite(triggerPin_FUStoLSL, HIGH);  
+      digitalWrite(triggerPin_FUStoLSL, HIGH); 
       Serial.print('1');
       Serial.print('\n');
 
-      delay(rest_period);
+      // Wait for 100ms before FES
+      delay(FES_delay);
 
+      // Pulse Triggers ON for FES 
+      digitalWrite(triggerPin_FES,HIGH);
+      digitalWrite(triggerPin_FEStoLSL);
+
+      // Wait for elapsed total OFF cycle
+      delay(rest_period - FES_delay);
+
+      // Pulse Trigger OFF for FUS+FES
       digitalWrite(triggerPin_FUS, LOW);  
-      digitalWrite(triggerPin_FUStoLSL, LOW);  
+      digitalWrite(triggerPin_FUStoLSL, LOW); 
+      digitalWrite(triggerPin_FES, LOW);  
+      digitalWrite(triggerPin_FEStoLSL, LOW); 
       Serial.print('0');
       Serial.print('\n');
 

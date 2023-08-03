@@ -1,8 +1,9 @@
+# Read, Record, and Save Data from AntNeuro Amplifier
+# Author: Kai Wing Kevin Tang, 2023
+
 import pandas as pd
 import time
- 
 
-"""Example program to show how to read a multi-channel time series from LSL."""
 
 from pylsl import StreamInlet, resolve_stream
 import BCI_Functions
