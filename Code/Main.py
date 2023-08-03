@@ -6,7 +6,7 @@ import serial
 import time
 
 
-port = '/dev/cu.usbmodem11401'
+port = 'COM3'
 
 def write(x):
     arduino.write(bytes(x, 'utf-8'))

@@ -15,7 +15,7 @@ int start_flag = 0;
 const unsigned long stimulation_period = 500; 
 const unsigned long rest_period = 500; 
 const unsigned long FES_delay = 100;
-const unsigned long epoch_rest = 1000;
+const unsigned long epoch_rest = 10000;
 
 // Global Variables
 unsigned long StartOfInterval;
