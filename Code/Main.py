@@ -4,8 +4,8 @@
 import serial
 import time
 
-# Import RehaMove3 Library
-from rehamove import *
+
+port = '/dev/cu.usbmodem11401'
 
 def write(x):
     arduino.write(bytes(x, 'utf-8'))
