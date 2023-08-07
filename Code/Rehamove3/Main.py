@@ -98,6 +98,7 @@ while True:
                 if (condition_FES == True and FES_Counter < FES_Total_Count):
                     reha_move.pulse(FES_Channel, FES_Current, FES_PulseWidth) # Sends pulse
                     FES_Counter += 1
+                    print("FES Count: " + FES_Counter)
             except:
                 print("Error: Cannot send FES Pulse")
 
