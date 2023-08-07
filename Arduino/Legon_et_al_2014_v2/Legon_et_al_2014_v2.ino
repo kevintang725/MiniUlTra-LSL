@@ -15,7 +15,7 @@ int start_flag = 0;
 const unsigned long stimulation_period = 500; 
 const unsigned long rest_period = 500; 
 const unsigned long FES_delay = 100;
-const unsigned long epoch_rest = 1000;
+const unsigned long epoch_rest = 10000;
 
 // Global Variables
 unsigned long StartOfInterval;
@@ -33,7 +33,7 @@ void setup()
   digitalWrite(triggerPin_FUStoLSL, LOW);
   pinMode(triggerPin_FUStoLSL, OUTPUT);
 
-  Serial.println("Press 1 to begin paradigm, Press 0 to stop paradigm");
+  Serial.println("Press 1 to begin paradigm, Press CTRL+C to stop paradigm");
 }
 
 void loop()
@@ -53,6 +53,7 @@ void loop()
       delay(1000);
       Serial.println("1");
       delay(1000);
+      Serial.println("------------------------ : Start ");
     }
   }
 
@@ -60,7 +61,7 @@ void loop()
       // Pulse Triggers ON for FUS
       digitalWrite(triggerPin_FUS, HIGH);
       digitalWrite(triggerPin_FUStoLSL, HIGH); 
-      Serial.print('1');
+      Serial.print("10");
       Serial.print('\n');
 
       // Wait for 100ms before FES
@@ -68,7 +69,9 @@ void loop()
 
       // Pulse Triggers ON for FES 
       digitalWrite(triggerPin_FES,HIGH);
-      digitalWrite(triggerPin_FEStoLSL);
+      digitalWrite(triggerPin_FEStoLSL, HIGH);
+      Serial.print("11");
+      Serial.print('\n');
 
       // Wait for elapsed total OFF cycle
       delay(rest_period - FES_delay);
@@ -78,7 +81,7 @@ void loop()
       digitalWrite(triggerPin_FUStoLSL, LOW); 
       digitalWrite(triggerPin_FES, LOW);  
       digitalWrite(triggerPin_FEStoLSL, LOW); 
-      Serial.print('0');
+      Serial.print("00");
       Serial.print('\n');
 
       if (Serial.available() > 0) {
@@ -86,7 +89,7 @@ void loop()
         incomingByte = Serial.read();
         if(incomingByte == '0'){
           start_flag = 0;
-          Serial.println("Ending experiment");
+          Serial.println("------------------------ : End Experiment ");
           break;
         }
       }

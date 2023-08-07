@@ -1,0 +1,10 @@
+# Data Analysis
+
+import csv
+import matplotlib 
+
+
+with open('trigger_test_highsample512Hz.csv', newline='') as csvfile:
+    data = csv.reader(csvfile, delimiter=',', quotechar='|')
+    for row in data:
+        print('['.join(''.join(item.split()) for item in row) + '\n')

@@ -1,0 +1,32 @@
+%% EEG Analysis
+
+%% Set up Filter
+fs = 512;
+
+fc1 = 2;
+fc2 = 90;
+[b1,a1] = butter(3,[fc1 fc2]/(fs/2), 'bandpass');
+[b1,a1] = butter(3,[fc1 fc2]/(fs/2), 'bandstop');
+
+
+%%
+d = designfilt('bandpassfir','FilterOrder',20, ...
+         'CutoffFrequency1',8,'CutoffFrequency2',100, ...
+         'SampleRate',fs);
+%fvtool(d)
+%%
+data = table2array(JJtFUS80);
+
+%%
+figure
+hold on
+for i = 1:4
+    filtered_data(:,i) = filtfilt(b,a, data(:,i));
+    plot(1e6*filtered_data(:,i), 'LineWidth', 1.5);
+    %axis([5000 5500 -inf inf])
+    ylabel('EEG Amplitude (uV)')
+    xlabel('Samples')
+    set(gca,'FontSize', 14, 'LineWidth', 1)
+end
+plot(10000*data(:,57),'LineWidth', 1.5)
+legend('C3', 'CP5', 'P3', 'CP1', 'tFUS/Sham')
