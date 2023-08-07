@@ -1,13 +1,12 @@
 # Main Code
 # Author: Kai Wing Kevin Tang, 2023
-# For Windows, only Python 3.7 Works
 
 import serial
 import time
-import os
-
 
 from rehamove import *
+
+port = '/dev/cu.usbmodem11401'
 
 def write(x):
     arduino.write(bytes(x, 'utf-8'))
@@ -48,8 +47,8 @@ def char_boolean(char):
         return False
 
 # Define COM Ports
-arduino_port = 'COM4'
-reha_port = 'COM5'
+arduino_port = '/dev/cu.usbmodem11401'
+reha_port = 'COM3'
 
 # Main Loop
 print("-------------------------------------------------------------------------")
