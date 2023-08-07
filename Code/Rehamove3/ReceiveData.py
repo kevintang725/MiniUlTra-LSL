@@ -17,7 +17,6 @@ def main():
     # create a new inlet to read from the stream
     inlet = StreamInlet(streams[0])
     
-    start = time.time()
 
     # create dataframe to store streamed raw EEG data 
     df = pd.DataFrame()
@@ -31,6 +30,8 @@ def main():
     # request total recording time to stream
     trial_duration = input('Please enter trial duration to record in seconds: ')
     
+    # Begin timer
+    start = time.time()
     while True:
         # read data from streaming layer
         sample, timestamp = inlet.pull_sample()
