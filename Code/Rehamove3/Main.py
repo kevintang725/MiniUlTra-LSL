@@ -37,13 +37,16 @@ def FES_Parameters():
     FES_Current = 5         # mA
     FES_PulseWidth = 200    # us
     FES_Channel = "blue"    # Channel
-    return FES_Channel, FES_Current, FES_PulseWidth
+    FES_Counter = 0         # Initialize FES Counts
+    FES_Total_Count = 120   # Total FES Count Limit
+    return FES_Channel, FES_Current, FES_PulseWidth, FES_Counter, FES_Total_Count
 
 def char_boolean(char):
     if (char == "1"):
         return True
     if (char == "0"):
         return False
+
 
 # Define COM Ports
 arduino_port = 'COM4'
@@ -62,7 +65,7 @@ except:
 
 # Establish serial communication with RehaMove3 and Set Parameters
 try:
-    FES_Channel, FES_Current, FES_PulseWidth = FES_Parameters()
+    FES_Channel, FES_Current, FES_PulseWidth, FES_Counter, FES_Total_Count = FES_Parameters()
     reha_move = Rehamove(reha_port)
     reha_move.version()
     reha_move.battery()
@@ -92,8 +95,9 @@ while True:
             # Check if FES Trigger is true, if so send pulse
             try:
                 condition_FES = char_boolean(FES)
-                if (condition_FES == True):
+                if (condition_FES == True and FES_Counter < FES_Total_Count):
                     reha_move.pulse(FES_Channel, FES_Current, FES_PulseWidth) # Sends pulse
+                    FES_Counter += 1
             except:
                 print("Error: Cannot send FES Pulse")
 
