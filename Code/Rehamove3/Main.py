@@ -11,8 +11,6 @@ from rehamove import *
 
 def write(x):
     arduino.write(bytes(x, 'utf-8'))
-    #time.sleep(0.05)
-    #data = arduino.readline()
 
 def read():
     receive = arduino.readline().decode("utf-8")
