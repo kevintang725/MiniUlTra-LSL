@@ -94,7 +94,8 @@ class RehamoveDevice(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc='The membership flag')
     __repr__ = _swig_repr
     device = property(_rehamovelib.RehamoveDevice_device_get, _rehamovelib.RehamoveDevice_device_set)
-    battery = property(_rehamovelib.RehamoveDevice_battery_get, _rehamovelib.RehamoveDevice_battery_set)
+    battery = property(_rehamovelib.RehamoveDevice_ba
+    ttery_get, _rehamovelib.RehamoveDevice_battery_set)
     mode = property(_rehamovelib.RehamoveDevice_mode_get, _rehamovelib.RehamoveDevice_mode_set)
     current = property(_rehamovelib.RehamoveDevice_current_get, _rehamovelib.RehamoveDevice_current_set)
     pulse_width = property(_rehamovelib.RehamoveDevice_pulse_width_get, _rehamovelib.RehamoveDevice_pulse_width_set)
