@@ -49,7 +49,7 @@ def char_boolean(char):
 
 
 # Define COM Ports
-arduino_port = 'COM4'
+arduino_port = 'COM3'
 reha_port = 'COM5'
 
 # Main Loop
