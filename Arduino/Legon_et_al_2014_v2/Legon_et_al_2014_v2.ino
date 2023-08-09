@@ -73,8 +73,13 @@ void loop()
       Serial.print("11");
       Serial.print('\n');
 
+<<<<<<< Updated upstream
       // Wait for elapsed remaining ON cycle
       delay(stimulation_period - FES_delay);
+=======
+      // Wait for elapsed remaining ON duration
+      delay(rest_period - FES_delay);
+>>>>>>> Stashed changes
 
       // Pulse Trigger OFF for FUS+FES
       digitalWrite(triggerPin_FUS, LOW);  
