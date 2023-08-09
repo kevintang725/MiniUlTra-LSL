@@ -16,6 +16,7 @@ const unsigned long stimulation_period = 500;
 const unsigned long rest_period = 500; 
 const unsigned long FES_delay = 100;
 const unsigned long epoch_rest = 10000;
+const unsigned long pulse_duration = 1;
 
 // Global Variables
 unsigned long StartOfInterval;

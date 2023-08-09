@@ -34,7 +34,7 @@ def read():
     return receive, FUS_Trigger, FES_Trigger
 
 def FES_Parameters():
-    FES_Current = 8         # mA
+    FES_Current = 12         # mA
     FES_PulseWidth = 200    # us
     FES_Channel = "blue"    # Channel
     FES_Counter = 0         # Initialize FES Counts
