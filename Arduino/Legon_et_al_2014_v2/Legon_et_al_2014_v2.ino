@@ -73,8 +73,8 @@ void loop()
       Serial.print("11");
       Serial.print('\n');
 
-      // Wait for elapsed total OFF cycle
-      delay(rest_period - FES_delay);
+      // Wait for elapsed remaining ON cycle
+      delay(stimulation_period - FES_delay);
 
       // Pulse Trigger OFF for FUS+FES
       digitalWrite(triggerPin_FUS, LOW);  
@@ -83,6 +83,9 @@ void loop()
       digitalWrite(triggerPin_FEStoLSL, LOW); 
       Serial.print("00");
       Serial.print('\n');
+
+      // Wait for elapsed total OFF cycle
+      delay(rest_period);
 
       if (Serial.available() > 0) {
         // read the incoming byte:

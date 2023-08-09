@@ -19,10 +19,10 @@ def read():
         FUS_Trigger = l[0]
         FES_Trigger = l[1]
         # Check conditions for triggers
-        if (l[0] == "1" and l[1] == "0") or (l[0] == "1" and l[1] == "1") or (l[0] == "0" and l[1] == "0") :
-            print(FUS_Trigger + "," + FES_Trigger)
-        else:
-            print(receive)          
+        #if (l[0] == "1" and l[1] == "0") or (l[0] == "1" and l[1] == "1") or (l[0] == "0" and l[1] == "0") :
+            #print(FUS_Trigger + "," + FES_Trigger)
+        #else:
+        #    print(receive)          
     except IndexError:
         print(receive)
         FUS_Trigger = "N"
@@ -34,7 +34,7 @@ def read():
     return receive, FUS_Trigger, FES_Trigger
 
 def FES_Parameters():
-    FES_Current = 5         # mA
+    FES_Current = 8         # mA
     FES_PulseWidth = 200    # us
     FES_Channel = "blue"    # Channel
     FES_Counter = 0         # Initialize FES Counts
@@ -50,7 +50,7 @@ def char_boolean(char):
 
 # Define COM Ports
 arduino_port = 'COM3'
-reha_port = 'COM5'
+reha_port = 'COM6'
 
 # Main Loop
 print("-------------------------------------------------------------------------")
@@ -98,9 +98,15 @@ while True:
                 if (condition_FES == True and FES_Counter < FES_Total_Count):
                     reha_move.pulse(FES_Channel, FES_Current, FES_PulseWidth) # Sends pulse
                     FES_Counter += 1
-                    print("FES Count: " + FES_Counter)
+                    print("FES Count: " + str(FES_Counter))
+                if (FES_Counter >= FES_Total_Count):
+                    write('0')
+                    time.sleep(1)
+                    trigger, FUS, FES = read()
+                    break
             except:
                 print("Error: Cannot send FES Pulse")
+                
 
     except KeyboardInterrupt:
         write('0')
