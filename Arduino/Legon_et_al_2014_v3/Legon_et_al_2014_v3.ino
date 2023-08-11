@@ -6,6 +6,7 @@ int triggerPin_FUS = 12;
 int triggerPin_FES = 13;
 int triggerPin_FUStoLSL = 11;
 int triggerPin_FEStoLSL = 10;
+int pwmPin = 9;             // The PWM output pin
 
 // Serial I/O Communication
 int incomingByte = 0; 
@@ -14,14 +15,24 @@ int start_flag = 0;
 // Stimulation Paradigm
 const unsigned long stimulation_period = 500; 
 const unsigned long rest_period = 500; 
+const unsigned long interval = stimulation_period + rest_period;
 const unsigned long FES_delay = 100;
-const unsigned long epoch_rest = 10000;
-const unsigned long pulse_duration = 1;
+const unsigned long pulseDurationMicros = stimulation_period*1000;
+const unsigned long single_pulse_ON_micros = 360;
+const unsigned long single_pulse_OFF_micros = 640;
+
 
 // Global Variables
 unsigned long StartOfInterval;
 unsigned long elapsed_rest;
+unsigned long currentMicros;
+unsigned long previousMicros = 0;
+unsigned long pulseMicros = 0;
+
+
 unsigned long elapsed_epoch = 0;
+int pwmValue = 0;                 // PWM duty cycle value (0 to 255)
+int counter = 0;
 
 
 void setup()
@@ -58,51 +69,48 @@ void loop()
     }
   }
 
-  elapsed_pulse_duration = micros();
-
   while (start_flag == 1){
-      elapsed_pulse_duration = micros() - elapsed_pulse_duration;
+      currentMicros = micros();
 
-      if (elapsed_pulse_duration < 1000){
+      // PWM
+      if (currentMicros - previousMicros >= interval*1000){
+        // Save the current time
+        previousMicros = currentMicros;
+
+        // Check if its time for FES pulse
+        if (currentMicros - pulseMicros >= FES_delay*1000){
+          digitalWrite(triggerPin_FES, LOW);  
+          digitalWrite(triggerPin_FEStoLSL, LOW); 
+          Serial.print("01");
+          Serial.print('\n');
+        }
+
+        //Serial.print(float(pulseMicros));
+        //Serial.print("\n");
+        delayMicroseconds(interval*1000);
+        // Reset internal pulse timer
+        pulseMicros = currentMicros;
+        //counter = 0;
+      }
+
+      // Check if its time for internal pulse
+      if (currentMicros - pulseMicros < pulseDurationMicros){
         // Pulse Triggers ON for FUS
         digitalWrite(triggerPin_FUS, HIGH);
         digitalWrite(triggerPin_FUStoLSL, HIGH); 
         Serial.print("10");
         Serial.print('\n');
+
+        delayMicroseconds(single_pulse_OFF_micros);
+
+        // Pulse Trigger OFF for FUS
+        digitalWrite(triggerPin_FUS, LOW);  
+        digitalWrite(triggerPin_FUStoLSL, LOW); 
+        Serial.print("00");
+        Serial.print('\n');
       }
 
-      // Wait for 100ms before FES
-      delay(FES_delay);
-
-      // Pulse Triggers ON for FES 
-      digitalWrite(triggerPin_FES,HIGH);
-      digitalWrite(triggerPin_FEStoLSL, HIGH);
-      Serial.print("11");
-      Serial.print('\n');
-
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-      // Wait for elapsed remaining ON cycle
-      delay(stimulation_period - FES_delay);
-=======
-      // Wait for elapsed remaining ON duration
-      delay(rest_period - FES_delay);
->>>>>>> Stashed changes
-=======
-      // Wait for elapsed remaining ON cycle
-      delay(stimulation_period - FES_delay);
->>>>>>> main
-
-      // Pulse Trigger OFF for FUS+FES
-      digitalWrite(triggerPin_FUS, LOW);  
-      digitalWrite(triggerPin_FUStoLSL, LOW); 
-      digitalWrite(triggerPin_FES, LOW);  
-      digitalWrite(triggerPin_FEStoLSL, LOW); 
-      Serial.print("00");
-      Serial.print('\n');
-
-      // Wait for elapsed total OFF cycle
-      delay(rest_period);
+      
 
       if (Serial.available() > 0) {
         // read the incoming byte:
