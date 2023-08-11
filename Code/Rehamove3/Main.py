@@ -19,10 +19,10 @@ def read():
         FUS_Trigger = l[0]
         FES_Trigger = l[1]
         # Check conditions for triggers
-        if (l[0] == "1" and l[1] == "0") or (l[0] == "1" and l[1] == "1") or (l[0] == "0" and l[1] == "0") :
-            print(FUS_Trigger + "," + FES_Trigger)
-        else:
-            print(receive)          
+        #if (l[0] == "1" and l[1] == "0") or (l[0] == "1" and l[1] == "1") or (l[0] == "0" and l[1] == "0") :
+            #print(FUS_Trigger + "," + FES_Trigger)
+        #else:
+        #    print(receive)          
     except IndexError:
         print(receive)
         FUS_Trigger = "N"
@@ -34,10 +34,12 @@ def read():
     return receive, FUS_Trigger, FES_Trigger
 
 def FES_Parameters():
-    FES_Current = 5         # mA
+    FES_Current = 12         # mA
     FES_PulseWidth = 200    # us
     FES_Channel = "blue"    # Channel
-    return FES_Channel, FES_Current, FES_PulseWidth
+    FES_Counter = 0         # Initialize FES Counts
+    FES_Total_Count = 120   # Total FES Count Limit
+    return FES_Channel, FES_Current, FES_PulseWidth, FES_Counter, FES_Total_Count
 
 def char_boolean(char):
     if (char == "1"):
@@ -45,10 +47,11 @@ def char_boolean(char):
     if (char == "0"):
         return False
 
+
 # Define COM Ports
-#arduino_port = 'COM4'                       # Window
-arduino_port = '/dev/cu.usbmodem11401'      # Mac 
-reha_port = 'COM5'
+#arduino_port = 'COM3'                       # Windows
+arduino_port = '/dev/cu.usbmodem11401'      # Mac
+reha_port = 'COM6'
 
 # Main Loop
 print("-------------------------------------------------------------------------")
@@ -63,7 +66,7 @@ except:
 
 # Establish serial communication with RehaMove3 and Set Parameters
 try:
-    FES_Channel, FES_Current, FES_PulseWidth = FES_Parameters()
+    FES_Channel, FES_Current, FES_PulseWidth, FES_Counter, FES_Total_Count = FES_Parameters()
     reha_move = Rehamove(reha_port)
     reha_move.version()
     reha_move.battery()
@@ -93,10 +96,18 @@ while True:
             # Check if FES Trigger is true, if so send pulse
             try:
                 condition_FES = char_boolean(FES)
-                if (condition_FES == True):
+                if (condition_FES == True and FES_Counter < FES_Total_Count):
                     reha_move.pulse(FES_Channel, FES_Current, FES_PulseWidth) # Sends pulse
+                    FES_Counter += 1
+                    print("FES Count: " + str(FES_Counter))
+                if (FES_Counter >= FES_Total_Count):
+                    write('0')
+                    time.sleep(1)
+                    trigger, FUS, FES = read()
+                    break
             except:
                 print("Error: Cannot send FES Pulse")
+                
 
     except KeyboardInterrupt:
         write('0')

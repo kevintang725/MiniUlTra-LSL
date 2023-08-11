@@ -58,7 +58,7 @@ void loop()
     if (incomingByte == '1'){
       start_flag = 1;
       Serial.println("Stimulation beginning in 10 seconds...");
-      //delay(10000);
+      delay(10000);
       Serial.println("3");
       delay(1000);
       Serial.println("2");
