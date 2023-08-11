@@ -46,7 +46,8 @@ def char_boolean(char):
         return False
 
 # Define COM Ports
-arduino_port = 'COM4'
+#arduino_port = 'COM4'                       # Window
+arduino_port = '/dev/cu.usbmodem11401'      # Mac 
 reha_port = 'COM5'
 
 # Main Loop
