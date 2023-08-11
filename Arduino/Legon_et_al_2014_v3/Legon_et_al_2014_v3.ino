@@ -79,8 +79,8 @@ void loop()
 
         // Check if its time for FES pulse
         if (currentMicros - pulseMicros >= FES_delay*1000){
-          digitalWrite(triggerPin_FES, LOW);  
-          digitalWrite(triggerPin_FEStoLSL, LOW); 
+          digitalWrite(triggerPin_FES, HIGH);  
+          digitalWrite(triggerPin_FEStoLSL, HIGH); 
           Serial.print("01");
           Serial.print('\n');
         }
@@ -96,8 +96,8 @@ void loop()
       // Check if its time for internal pulse
       if (currentMicros - pulseMicros < pulseDurationMicros){
         // Pulse Triggers ON for FUS
-        digitalWrite(triggerPin_FUS, HIGH);
-        digitalWrite(triggerPin_FUStoLSL, HIGH); 
+        digitalWrite(triggerPin_FUS, HIGH); 
+        digitalWrite(triggerPin_FUStoLSL, LOW); 
         Serial.print("10");
         Serial.print('\n');
 
@@ -105,12 +105,14 @@ void loop()
 
         // Pulse Trigger OFF for FUS
         digitalWrite(triggerPin_FUS, LOW);  
-        digitalWrite(triggerPin_FUStoLSL, LOW); 
+        digitalWrite(triggerPin_FES, LOW);  
+        digitalWrite(triggerPin_FEStoLSL, LOW);
         Serial.print("00");
         Serial.print('\n');
       }
-
-      
+      else{
+        digitalWrite(triggerPin_FUStoLSL, HIGH);
+      }
 
       if (Serial.available() > 0) {
         // read the incoming byte:

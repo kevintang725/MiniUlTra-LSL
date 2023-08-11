@@ -58,7 +58,6 @@ void loop()
     }
   }
 
-  elapsed_pulse_duration = micros();
 
   while (start_flag == 1){
       elapsed_pulse_duration = micros() - elapsed_pulse_duration;
