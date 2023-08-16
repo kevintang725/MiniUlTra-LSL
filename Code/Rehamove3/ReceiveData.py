@@ -1,5 +1,6 @@
 # Read, Record, and Save Data from AntNeuro Amplifier
 # Author: Kai Wing Kevin Tang, 2023
+# Requires sampling rate >=4096Hz in AntNeuro to pick up TTL
 
 import pandas as pd
 import time
