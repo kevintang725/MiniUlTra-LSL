@@ -1,6 +1,7 @@
 # Main Code
 # Author: Kai Wing Kevin Tang, 2023
 # For Windows, only Python 3.7 Works
+# Set AntNeuro Sampling Rate Fs = 512Hz
 
 import serial
 import time
@@ -49,7 +50,7 @@ def char_boolean(char):
 
 
 # Define COM Ports
-arduino_port = 'COM3'
+arduino_port = 'COM4'
 reha_port = 'COM6'
 
 # Main Loop

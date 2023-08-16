@@ -6,11 +6,11 @@ clear all
 close all
 
 %% Set up Filter
-fs = 512; %sampling frequency
+fs = 4096; %sampling frequency
 
 % Third Order Butterworth Filters
-[b1,a1] = butter(3,[2]/(fs/2), 'high');
-[b2,a2] = butter(3,[59 61]/(fs/2), 'stop');
+[b1,a1] = butter(4,[2 100]/(fs/2), 'bandpass');
+[b2,a2] = butter(4,[59 61]/(fs/2), 'stop');
 
 % Bandstop
 bsFilt = designfilt('bandstopfir','FilterOrder',2, ...
@@ -28,7 +28,7 @@ hpFilt = designfilt('highpassiir','FilterOrder',2, ...
          'SampleRate',fs);
 %fvtool(hpFilt)
 %% Import File
-filename = "/Users/KevinTang/Desktop/UTAustin/Code/GitHub/Human Trials/FUS + EEG (SEP)/JJ_08082023/JJ_FUS-FES+_1.csv";
+filename = "/Users/KevinTang/Desktop/UTAustin/Code/GitHub/Human Trials/FUS + EEG (SEP)/JJ_08152023/JJ_FUS-FES-.csv";
 data = importfile(filename);
 data = table2array(data);
 
@@ -97,8 +97,10 @@ function plot_epochs(ep,fs)
     plot(x, y, 'r', 'LineWidth', 1.5);
     %axis([-inf inf -max(abs(curve2))-1 max(abs(curve1)) + 1])
     %rectangle('Position',[-100 min(curve2)-1 500 1], 'FaceColor',[0.3010 0.7450 0.9330])
-    axis([-inf inf -5 5])
-    rectangle('Position',[-100 -5 500 1], 'FaceColor',[0.3010 0.7450 0.9330])
+    %axis([-inf inf -5 5])
+    %rectangle('Position',[-100 -5 500 1], 'FaceColor',[0.3010 0.7450 0.9330])
+    axis([-inf inf min(y)-0.01*min(y) abs(min(y)+0.01*abs(min(y)))])
+    rectangle('Position',[-100 min(y)-0.01*min(y) 500 0.1*abs(min(y))], 'FaceColor',[0.3010 0.7450 0.9330])
     xline(0, '--','LineWidth', 2)
     ylabel('EEG Amplitude (uV)')
     xlabel('Time (ms)')
@@ -107,7 +109,7 @@ end
 
 function [C3, CP5, P3, CP1] = extract_epochs(filtered_data, fs, epoch_triggers)
     [pks, locs] = findpeaks(epoch_triggers(:,58));
-    for i = 1:length(locs) - 10
+    for i = 1:length(locs) - 1
         C3(:,i) = filtered_data(locs(i)-(100/(1/fs)/1000):locs(i)+(600/(1/fs)/1000),2);
         CP5(:,i) = filtered_data(locs(i)-(100/(1/fs)/1000):locs(i)+(600/(1/fs)/1000),3);
         P3(:,i) = filtered_data(locs(i)-(100/(1/fs)/1000):locs(i)+(600/(1/fs)/1000),4);

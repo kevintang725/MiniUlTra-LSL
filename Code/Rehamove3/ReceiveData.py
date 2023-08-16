@@ -1,5 +1,6 @@
 # Read, Record, and Save Data from AntNeuro Amplifier
 # Author: Kai Wing Kevin Tang, 2023
+# Requires sampling rate >=4096Hz in AntNeuro to pick up TTL
 
 import pandas as pd
 import time
@@ -37,7 +38,7 @@ def main():
         sample, timestamp = inlet.pull_sample()
         # compute elapsed time
         elapsed_time = time.time() - start
-        print(elapsed_time)
+        print("Elapsed Time (s): " + str(elapsed_time), end='\r')
         # append data to the dataframe
         df = df.append({'time':timestamp, 'data':sample}, ignore_index=True)
         #df = pd.concat([df, pd.DataFrame({'time':timestamp, 'data':sample})],ignore_index=False)
@@ -52,11 +53,13 @@ def main():
             # terminate and exit loop
             break
     
-    # display dataframe stored
+    # display dataframe store
     print(df)   
+    print("Saving Data...")
 
     # save to csv
     df.to_csv(file_name + '.csv')
+    print("Done")
 
 
 if __name__ == '__main__':
