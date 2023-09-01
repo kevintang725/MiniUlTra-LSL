@@ -6,11 +6,11 @@ clear all
 close all
 
 %% Set up Filter
-fs = 4096; %sampling frequency
+fs = 512; %sampling frequency
 
 % Third Order Butterworth Filters
-[b1,a1] = butter(4,[2 100]/(fs/2), 'bandpass');
-[b2,a2] = butter(4,[59 61]/(fs/2), 'stop');
+[b1,a1] = butter(3,[2 90]/(fs/2), 'bandpass');
+[b2,a2] = butter(3,[59 61]/(fs/2), 'stop');
 
 % Bandstop
 bsFilt = designfilt('bandstopfir','FilterOrder',2, ...
@@ -28,7 +28,9 @@ hpFilt = designfilt('highpassiir','FilterOrder',2, ...
          'SampleRate',fs);
 %fvtool(hpFilt)
 %% Import File
-filename = "/Users/KevinTang/Desktop/UTAustin/Code/GitHub/Human Trials/FUS + EEG (SEP)/JJ_08152023/JJ_FUS-FES-.csv";
+filename = "/Volumes/Kevin's HDD/Data/UTAustin/Code/Human Trials/Artefact Test/PDMS+LM.csv";
+%filename = "/Volumes/Kevin's HDD/Data/UTAustin/Code/Human Trials/Artefact Test/pdms_encap_test.csv";
+%filename = "/Users/KevinTang/Desktop/UTAustin/Code/GitHub/Human Trials/FUS + EEG (SEP)/JL_08172023/JL_FUS+FES-_1_.csv";
 data = importfile(filename);
 data = table2array(data);
 
@@ -41,25 +43,35 @@ figure
 hold on
 for i = 2:5
     filtered_data(:,i) = data(:,i);
-    %filtered_data(:,i) = medfilt1(filtered_data(:,i), fs/2);
+    %filtered_data(:,i) = medfilt1(filtered_data(:,i), fs/8);
     %filtered_data(:,i) = filtfilt(hpFilt, filtered_data(:,i));
     %filtered_data(:,i) = filtfilt(bsFilt, filtered_data(:,i));
     filtered_data(:,i) = filtfilt(b1, a1, filtered_data(:,i));
     filtered_data(:,i) = filtfilt(b2, a2, filtered_data(:,i));
+    x = 1e6*filtered_data(:,i);
     
-    plot(time, 1e6*filtered_data(:,i), 'LineWidth', 1.5);
+    %Remove Threshold and Interpolate
+    %x(x>100) = nan;
+    %x(x<-100) = nan;
+    %x=fillmissing(x,'previous'); 
+    
+    %x = medfilt1(x, fs/2);
+    
+    filtered_data(:,i) = x;
+    
+    plot(time, filtered_data(:,i), 'LineWidth', 1.5);
     %axis([-inf inf -100 100])
     %axis([2000 4000 -inf inf])
     ylabel('EEG Amplitude (uV)')
     xlabel('Time (ms)')
     set(gca,'FontSize', 14, 'LineWidth', 1)
 end
-%plot(time,20*data(:,58),'r','LineWidth', 2)
+plot(time,100*data(:,58),'r','LineWidth', 2)
 legend('C3', 'CP5', 'P3', 'CP1', 'FUS')
 hold off
 
 %% Power Spectrum Density
-channel_names = {'C3', 'CP5', 'P3', 'CP1', 'tFUS'};
+channel_names = {'C3', 'CP5', 'P3', 'CP1'};
 figure
 for i = 1:4
     subplot(2,2,i)
@@ -71,25 +83,50 @@ end
 [C3, CP5, P3, CP1] = extract_epochs(filtered_data, fs, data);
 
 figure
-subplot(2,2,1)
-plot_epochs(C3,fs)
-title('C3')
-subplot(2,2,2)
-plot_epochs(CP5,fs)
-title('CP5')
-subplot(2,2,3)
-plot_epochs(P3,fs)
-title('P3')
-subplot(2,2,4)
-plot_epochs(CP1,fs)
-title('CP1')
+subplot(2,4,1)
+plot_epochs(C3,'C3',fs)
+subplot(2,4,2)
+plot_scalogram_epoch(C3, 'C3', fs)
+subplot(2,4,3)
+plot_epochs(CP1,'CP1',fs)
+subplot(2,4,4)
+plot_scalogram_epoch(CP1, 'CP1', fs)
+subplot(2,4,5)
+plot_epochs(CP5,'CP5',fs)
+subplot(2,4,6)
+plot_scalogram_epoch(CP5, 'CP5', fs)
+subplot(2,4,7)
+plot_epochs(P3,'P3',fs)
+subplot(2,4,8)
+plot_scalogram_epoch(P3, 'P3', fs)
+
 %% Functions
-function plot_epochs(ep,fs)
-    y = 1e6*(mean(ep') - mean(mean(ep')));
+function plot_scalogram_epoch(data, name, fs)
+    x = mean(data');
+    t = [-200:1000/fs:600];
+    [cfs,f] = cwt(x,'amor',fs);
+    p = image("XData",t,"YData",f,"CData",10*(abs(cfs)),"CDataMapping","scaled");            
+    rectangle('Position',[-100 0 500 2], 'FaceColor',[0.3010 0.7450 0.9330])
+    %set(gca,"YScale","log")
+    set(gca,'FontSize', 14, 'LineWidth', 1)
+    axis([-inf inf 0 60])
+    xlabel("Time (ms)")
+    ylabel("Frequency (Hz)")
+    xline(0, 'r--','LineWidth', 2)
+    hcb=colorbar;
+    hcb.Title.String = "Power (dB)";
+    colormap turbo
+    caxis([0 20])
+    title(name)
+end
+
+function plot_epochs(ep,name, fs)
+    y = (mean(ep'));
+    %y = 1e6*(ep - mean(ep')');
     x = [-200:1000/fs:500];
     std_dev = std(ep');
-    curve1 = y + 1e6*std_dev;
-    curve2 = y - 1e6*std_dev;
+    curve1 = y' + std_dev;
+    curve2 = y' - std_dev;
     x2 = [x, fliplr(x)];
     inBetween = [curve1, fliplr(curve2)];
     %fill(x2, inBetween, 'k', 'FaceAlpha', 0.1);
@@ -99,17 +136,19 @@ function plot_epochs(ep,fs)
     %rectangle('Position',[-100 min(curve2)-1 500 1], 'FaceColor',[0.3010 0.7450 0.9330])
     %axis([-inf inf -5 5])
     %rectangle('Position',[-100 -5 500 1], 'FaceColor',[0.3010 0.7450 0.9330])
-    axis([-inf inf min(y)-0.01*min(y) abs(min(y)+0.01*abs(min(y)))])
-    rectangle('Position',[-100 min(y)-0.01*min(y) 500 0.1*abs(min(y))], 'FaceColor',[0.3010 0.7450 0.9330])
+    axis([-inf inf -abs(min(y)+ 0.5*min(y)) abs(max(y)+0.5*abs(min(y)))])
+    rectangle('Position',[-100 -abs(min(y)+ 0.5*min(y)) 500 0.1*abs(min(y)+ 0.5*min(y))], 'FaceColor',[0.3010 0.7450 0.9330])
     xline(0, '--','LineWidth', 2)
+    yline(0, '--','LineWidth', 2)
     ylabel('EEG Amplitude (uV)')
     xlabel('Time (ms)')
+    title(name)
     set(gca,'FontSize', 14, 'LineWidth', 1)
 end
 
 function [C3, CP5, P3, CP1] = extract_epochs(filtered_data, fs, epoch_triggers)
     [pks, locs] = findpeaks(epoch_triggers(:,58));
-    for i = 1:length(locs) - 1
+    for i = 1:length(locs) - 10
         C3(:,i) = filtered_data(locs(i)-(100/(1/fs)/1000):locs(i)+(600/(1/fs)/1000),2);
         CP5(:,i) = filtered_data(locs(i)-(100/(1/fs)/1000):locs(i)+(600/(1/fs)/1000),3);
         P3(:,i) = filtered_data(locs(i)-(100/(1/fs)/1000):locs(i)+(600/(1/fs)/1000),4);
