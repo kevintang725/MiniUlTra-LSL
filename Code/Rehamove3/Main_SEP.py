@@ -78,7 +78,7 @@ except:
 # Main Loop
 print("-------------------------------------------------------------------------")
 print("Main Terminal")
-print("tFUS+FES+EEG Experiment v1")
+print("Transcranial Focused Ultrasound with Sensory Evoked Potential Experiment")
 print("User: Kevin Tang")
 print("-------------------------------------------------------------------------")
 

@@ -6,7 +6,7 @@
 import serial
 import time
 import os
-import pygame,time
+import pygame,time, sys
 
 
 from rehamove import *
@@ -56,6 +56,7 @@ reha_port = 'COM6'
 
 # Photic Stimulation Parameters
 Photic_Frequency = 25           # Hz
+running = True
 
 # Main Loop
 print("-------------------------------------------------------------------------")
@@ -82,7 +83,7 @@ except:
 # Main Loop
 print("-------------------------------------------------------------------------")
 print("Main Terminal")
-print("tFUS+FES+EEG Experiment v1")
+print("Transcranial Focused Ultrasound with Visual Evoked Potential Experiment")
 print("User: Kevin Tang")
 print("-------------------------------------------------------------------------")
 
@@ -124,10 +125,19 @@ while True:
                     write('0')
                     time.sleep(1)
                     trigger, FUS, FES = read()
+                    if running == True:
+                        for event in pygame.event.get():
+                            if event.type == pygame.QUIT:
+                                running = False
+                    running = False    
+                    pygame.display.quit()
                     pygame.quit()
+                    time.sleep(2)
             except:
                 print("Error: Cannot send FES Pulse")
-
+                if running == False:
+                    print("Ending Program...")
+                    break
                 
 
     except KeyboardInterrupt:
