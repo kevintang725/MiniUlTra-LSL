@@ -10,7 +10,7 @@ fs = 512; %sampling frequency
 
 % Third Order Butterworth Filters
 [b1,a1] = butter(3,[2 90]/(fs/2), 'bandpass');
-[b2,a2] = butter(1,[59 61]/(fs/2), 'stop');
+[b2,a2] = butter(3,[59 61]/(fs/2), 'stop');
 
 % Bandstop
 bsFilt = designfilt('bandstopfir','FilterOrder',2, ...
@@ -28,7 +28,7 @@ hpFilt = designfilt('highpassiir','FilterOrder',2, ...
          'SampleRate',fs);
 %fvtool(hpFilt)
 %% Import File
-filename = "/Volumes/Kevin's HDD/SFAT__650kHz_18mm_EOG-.csv";
+filename = "/Users/KevinTang/Desktop/UTAustin/Code/GitHub/Human Trials/FUS + EEG (SEP)/JL_08172023/JL_FUS+FES-_2.csv";
 %filename = "/Volumes/Kevin's HDD/Data/UTAustin/Code/Human Trials/Artefact Test/pdms_encap_test.csv";
 %filename = "/Users/KevinTang/Desktop/UTAustin/Code/GitHub/Human Trials/FUS + EEG (SEP)/JL_08172023/JL_FUS+FES-_1_.csv";
 data = importfile(filename);
@@ -39,7 +39,7 @@ data = table2array(data);
 time = 1000*[0:1/fs:(length(data(:,1)) - 1)/fs];
 
 %% Pre-Processing
-title_label = {'C3', 'CP5', 'P3', 'CP1', 'FUS'};
+title_label = {'C3', 'CP5', 'P3', 'CP1', 'FUS'}
 figure
 for i = 2:5
     filtered_data(:,i) = data(:,i);
@@ -48,14 +48,6 @@ for i = 2:5
     %filtered_data(:,i) = filtfilt(bsFilt, filtered_data(:,i));
     filtered_data(:,i) = filtfilt(b1, a1, filtered_data(:,i));
     filtered_data(:,i) = filtfilt(b2, a2, filtered_data(:,i));
-    %filtered_data(:,i) = filtfilt(b3, a3, filtered_data(:,i));
-    
-    % IIR notch filters in series (need to design a single faster IIR)
-    for Iharm = 3:2:60 %Filter harmonics up to 60Hz
-        [b, a] = butter(3,[(Iharm-0.05) (Iharm+0.05)]/(fs/2), 'stop');
-        filtered_data(:,i) = filter(b,a,filtered_data(:,i));  %apply the filter onto the previous output
-    end
-
     x = 1e6*filtered_data(:,i);
     
     %Remove Threshold and Interpolate
@@ -68,23 +60,20 @@ for i = 2:5
     filtered_data(:,i) = x;
     
     subplot(5,1,i-1)
-    plot((time*1e-3), filtered_data(:,i), 'LineWidth', 0.5);
+    plot(time, filtered_data(:,i), 'LineWidth', 1.5);
     %axis([-inf inf -100 100])
     %axis([2000 4000 -inf inf])
-    axis([0 180 -inf inf])
-    %axis([0 180 -20 20])
     ylabel('EEG Amplitude (uV)')
-    xlabel('Time (s)')
-    set(gca,'FontSize', 10, 'LineWidth', 1, 'FontWeight', 'Bold')
+    xlabel('Time (ms)')
+    set(gca,'FontSize', 14, 'LineWidth', 1)
     title(title_label(i-1))
 end
 subplot(5,1,i)
-plot((time*1e-3),100*data(:,58),'r','LineWidth', 2)
-ylabel('Trigger')
-xlabel('Time (s)')
-axis([0 180 0 1])
-set(gca,'FontSize', 10, 'LineWidth', 1, 'FontWeight', 'Bold')
-title('FUS')
+plot(time,100*data(:,58),'r','LineWidth', 2)
+ylabel('EEG Amplitude (uV)')
+    xlabel('Time (ms)')
+    set(gca,'FontSize', 14, 'LineWidth', 1)
+    title(title_label(i-1))
 %% Power Spectrum Density
 channel_names = {'C3', 'CP5', 'P3', 'CP1'};
 figure
@@ -119,7 +108,6 @@ plot_scalogram_epoch(P3, 'P3', fs)
 %% Functions
 function plot_scalogram_epoch(data, name, fs)
     x = mean(data');
-    %x = data(:,60);
     t = [-200:1000/fs:600];
     [cfs,f] = cwt(x,'amor',fs);
     p = image("XData",t,"YData",f,"CData",10*(abs(cfs)),"CDataMapping","scaled");            
@@ -134,20 +122,19 @@ function plot_scalogram_epoch(data, name, fs)
     hcb.Title.String = "Power (dB)";
     colormap turbo
     %caxis([0 20])
-    %caxis([0 80])
+    caxis([0 80])
     title(name)
 end
 
 function plot_epochs(ep,name, fs)
     y = (mean(ep'));
-    % = ep(:,60);
     %y = 1e6*(ep - mean(ep')');
     x = [-200:1000/fs:500];
-    %std_dev = std(ep');
-    %curve1 = y' + std_dev;
-    %curve2 = y' - std_dev;
-    %x2 = [x, fliplr(x)];
-    %inBetween = [curve1, fliplr(curve2)];
+    std_dev = std(ep');
+    curve1 = y' + std_dev;
+    curve2 = y' - std_dev;
+    x2 = [x, fliplr(x)];
+    inBetween = [curve1, fliplr(curve2)];
     %fill(x2, inBetween, 'k', 'FaceAlpha', 0.1);
     hold on;
     plot(x, y, 'r', 'LineWidth', 1.5);

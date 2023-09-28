@@ -35,7 +35,7 @@ def main():
     except:
         print('Unable to connect to arduino')
     
-    # create dataframe to store streamed raw EEG data 
+    # create dataframe to store streamed raw temperature data
     df = pd.DataFrame()
     
     # request file name input from user
@@ -50,10 +50,10 @@ def main():
         temperature = arduino.readline().decode("utf-8")
         # compute elapsed time
         elapsed_time = time.time() - start
-        print("Elapsed Time (s): " + str(elapsed_time) + "| Temperature (C): " + str(temperature), end='\r')
+        print("Elapsed Time (s): " + str(elapsed_time) + " | Temperature (C): " + str(temperature), end='\r')
         # append data to the dataframe
         #df = df.append({'Temperature (C)': temperature}, ignore_index=True)
-        df = pd.concat([df, pd.DataFrame([{'Time (s)': elapsed_time, 'Temperature (C)': temperature}])], ignore_index=True)
+        df = pd.concat([df, pd.DataFrame([{'Time (s)': elapsed_time, 'Temperature (C)': float(temperature)}])], ignore_index=True)
 
         # Check if recorded time has reached user input's total time desired
         if elapsed_time > int(trial_duration):

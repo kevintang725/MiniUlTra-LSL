@@ -50,7 +50,7 @@ def char_boolean(char):
 
 
 # Define COM Ports
-arduino_port = 'COM4'
+arduino_port = '/dev/cu.usbmodem1401'
 reha_port = 'COM6'
 
 # Main Loop
