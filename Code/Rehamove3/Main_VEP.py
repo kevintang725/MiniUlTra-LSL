@@ -89,7 +89,19 @@ print("-------------------------------------------------------------------------
 
 pygame.init()
 scr = pygame.display.set_mode((0, 0), pygame.FULLSCREEN )
-r=1
+# Initialize Visual Stimuli
+background1 = pygame.Surface(scr.get_size())
+ts, w, h, c1, c2 = 50, *background1.get_size(), (255, 255, 255), (0, 0, 0)
+tiles = [((x*ts, y*ts, ts, ts), c1 if (x+y) % 2 == 0 else c2) for x in range((w+ts-1)//ts) for y in range((h+ts-1)//ts)]
+[pygame.draw.rect(background1, color, rect) for rect, color in tiles]
+
+background2 = pygame.Surface(scr.get_size())
+ts, w, h, c1, c2 = 50, *background2.get_size(), (0, 0, 0), (255, 255, 255)
+tiles = [((x*ts, y*ts, ts, ts), c1 if (x+y) % 2 == 0 else c2) for x in range((w+ts-1)//ts) for y in range((h+ts-1)//ts)]
+[pygame.draw.rect(background2, color, rect) for rect, color in tiles]
+
+r=0
+
 while True:
     try:
         # Wait for initialization
@@ -111,15 +123,22 @@ while True:
                     print("FES Count: " + str(FES_Counter))
 
                     while (r < Photic_Frequency):
-                        scr.fill(pygame.Color('black'))
-                        pygame.display.update()
+                        #scr.fill(pygame.Color('black'))
+                        #pygame.display.update()
+                        #time.sleep(1/Photic_Frequency/2)
+                        #scr.fill(pygame.Color('white'))
+                        #pygame.display.update()
+                        #time.sleep(1/Photic_Frequency/2)
+                        scr.blit(background1, (0, 0))
+                        pygame.display.flip()
                         time.sleep(1/Photic_Frequency/2)
-                        scr.fill(pygame.Color('white'))
-                        pygame.display.update()
-                        time.sleep(1/Photic_Frequency/2)
+                        scr.blit(background2, (0, 0))
+                        pygame.display.flip()
                         r+=1
-                    scr.fill(pygame.Color('black'))
-                    pygame.display.update()
+                    #scr.fill(pygame.Color('black'))
+                    #pygame.display.update()
+                    scr.blit(background1, (0, 0))
+                    pygame.display.flip()
                     r = 0
                 if (FES_Counter >= FES_Total_Count):
                     write('0')
