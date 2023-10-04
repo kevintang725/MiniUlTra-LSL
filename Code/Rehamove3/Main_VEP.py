@@ -61,6 +61,7 @@ def char_boolean(char):
 
 
 # Define COM Ports
+#arduino_port = 'COM3'
 arduino_port = 'COM3'
 reha_port = 'COM6'
 
@@ -139,17 +140,15 @@ while True:
                         #scr.fill(pygame.Color('white'))
                         ##pygame.display.update()
                         #time.sleep(1/Photic_Frequency/2)
-                        #scr.blit(background1, (0, 0))
-                        #pygame.display.flip()
-                        #time.sleep(1/Photic_Frequency/2)
-                        #scr.blit(background2, (0, 0))
-                        #pygame.display.flip()
-                        #time.sleep(1/Photic_Frequency/2)
+                        scr.blit(background1, (0, 0))
+                        pygame.display.flip()
+                        time.sleep(1/Photic_Frequency/2)
+                        scr.blit(background2, (0, 0))
+                        pygame.display.flip()
+                        time.sleep(1/Photic_Frequency/2)
                         r+=1
-                    #scr.fill(pygame.Color('black'))
-                    #pygame.display.update()
-                    #scr.blit(background1, (0, 0))
-                    #pygame.display.flip()
+                    scr.fill(pygame.Color('black'))
+                    pygame.display.update()
                     r = 0
                 if (FES_Counter >= FES_Total_Count):
                     write('0')
