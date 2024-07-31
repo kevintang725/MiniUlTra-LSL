@@ -52,12 +52,15 @@ Time required to download repository (~2-5min)
 
 ## Demo
 Run Main.py in terminal
+
 ![image](https://github.com/user-attachments/assets/48409f9f-b201-43d2-af29-9af780b4586c)
 
 If Rehamove 3 is not connected, the software will send trigger but each pulse will output "ERROR1 Rehamove object does not exist"
+
 ![image](https://github.com/user-attachments/assets/4b83c213-b863-478c-bdb4-f084b1e1290e)
 
 To run Lab Streaming Layer in recording data, run ReceiveData.py in terminal
+
 ![image](https://github.com/user-attachments/assets/514c7502-de66-46ea-a932-91b966990b35)
 
 
