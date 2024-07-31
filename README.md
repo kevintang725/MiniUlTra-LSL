@@ -24,5 +24,6 @@ Participants were positioned and seated in an adjustable height chair, where the
 5.) To change or view experimental protocol and paradigm via triggering (TTL) from Arduino Uno. Navigate to _Arduino/Legon_et_al_2014_v3/Legon_et_al_2014_v3.ino_
     
 ## Experimental and Software/Hardware Setup
-<img width="832" alt="image" src="https://github.com/user-attachments/assets/91e59777-b9a7-41ba-a24a-fdb6b1e3379a">
+<img width="832" alt="image" src="https://github.com/user-attachments/assets/c9ffa133-0699-4cfc-8b81-768f76bac352">
+
 
