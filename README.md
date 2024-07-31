@@ -19,12 +19,16 @@ Participants were positioned and seated in an adjustable height chair, where the
 
 ## How to use (Recommended to use Anaconda and create a new environment)
 1.) Download repository to your local directory.   
+
 2.) Navigate to _Code/Rehamove3_ directory
+
 3.) Depending on your Operating System (OS), navigate to _Code/Rehamove3/builds/python_ and copy the corresponding three files in the OS system you are using and paste them         back into the _Code/Rehamove3_ directory
     - _rehamovelib.so
     - rehamove.py
     - rehamovelib.py
+    
 4.) Open terminal from _Code/Rehamove3_ directory and run _ReceiveData.py_ to run Lab Streaming Layer to collect data from your recording system (it may prompt you to install      pylsl, to do so use _pip install pylsl_)
+
 5.) To change or view experimental protocol and paradigm via triggering (TTL) from Arduino Uno. Navigate to _Arduino/Legon_et_al_2014_v3/Legon_et_al_2014_v3.ino_
     
 ## Experimental and Software/Hardware Setup
