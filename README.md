@@ -52,6 +52,7 @@ Time required to download repository (~2-5min)
 
 ## Demo
 Run Main.py in terminal
+If Arduino and Rehamove3 is not connected or detected shown below, check COM ports and modify Main.py script to the correct corresponding COM ports.
 
 ![image](https://github.com/user-attachments/assets/48409f9f-b201-43d2-af29-9af780b4586c)
 
