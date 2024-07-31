@@ -2,6 +2,8 @@
 ## Author Information
 Kai Wing Kevin Tang1,†, Jinmo Jeong1,†, Ju-Chun Hsieh1,†, Mengmeng Yao1, Hong Ding1, Wenliang Wang1, Xiangping Liu1, Ilya Pyatnitskiy1, Weilong He1, William D. Moscoso-Barrera1, Anakaren Romero Lozano1, Brinkley Artman1, Heeyong Huh2, Preston S. Wilson3, Huiliang Wang1* 
 
+BioRxiv Preprint: doi: https://doi.org/10.1101/2024.07.17.603650
+
 ## Affiliation
 1:Department of Biomedical Engineering, Cockrell School of Engineering, The University of Texas at Austin, Austin, Texas 78712, United States.
 2:Department of Aerospace Engineering and Engineering Mechanics, Cockrell School of Engineering, The University of Texas at Austin, Austin, Texas 78712, United States.
