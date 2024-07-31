@@ -27,9 +27,11 @@ Participants were positioned and seated in an adjustable height chair, where the
     - rehamove.py
     - rehamovelib.py
     
-4.) Open terminal from _Code/Rehamove3_ directory and run _ReceiveData.py_ to run Lab Streaming Layer to collect data from your recording system (it may prompt you to install      pylsl, to do so use _pip install pylsl_)
+4.) Open a terminal from _Code/Rehamove3_ directory and _run Main_SEP.py_ to begin experiment. 
 
-5.) To change or view experimental protocol and paradigm via triggering (TTL) from Arduino Uno. Navigate to _Arduino/Legon_et_al_2014_v3/Legon_et_al_2014_v3.ino_
+5.) Open seperate terminal from _Code/Rehamove3_ directory and run _ReceiveData.py_ to run Lab Streaming Layer to collect data from your recording system (it may prompt you to     install pylsl, to do so use _pip install pylsl_). This will prompt you how long you wish your recording would be and continous run for the desired time, which will then be     saved to a .csv file in the same directory.
+
+6.) To change or view experimental protocol and paradigm via triggering (TTL) from Arduino Uno. Navigate to _Arduino/Legon_et_al_2014_v3/Legon_et_al_2014_v3.ino_
     
 ## Experimental and Software/Hardware Setup
 <img width="832" alt="image" src="https://github.com/user-attachments/assets/c9ffa133-0699-4cfc-8b81-768f76bac352">
