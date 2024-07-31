@@ -1,0 +1,265 @@
+%% EEG Analysis
+% Author: Kai Wing Kevin Tang, 2023
+
+clc
+clear all
+close all
+
+%% Set up Filter
+fs = 512; %sampling frequency
+
+% EEG Frequency of Interest
+[b1,a1] = butter(3,[2 90]/(fs/2), 'bandpass');
+[b2,a2] = butter(1,[59 61]/(fs/2), 'stop');
+
+%% Import File
+filename.data = "/Users/KevinTang/Desktop/UTAustin/Code/GitHub/Human Trials/FUS (Visual Evoked Potential)/Kevin_10022023/FUS+VEP+_2.csv";
+data = table2array(importfile(filename.data));
+
+filename.montage = "/Users/KevinTang/Desktop/UTAustin/Code/GitHub/Human Trials/EEG Montage/EEG32-BIP24-CA-209.xlsx"
+channel_name = readtable(filename.montage);
+
+
+% Initialize Time to Start from Zero
+%time = 1e-6*(data(:,1) - data(1,1)); % Convert s to ms
+time = 1000*[0:1/fs:(length(data(:,1)) - 1)/fs];
+
+%% Pre-Processing
+title_label = table2array(channel_name(:,2));
+for i = 2:height(channel_name) + 1
+    filtered_data(:,i) = data(:,i);
+    filtered_data(:,i) = filtfilt(b1, a1, filtered_data(:,i));
+    filtered_data(:,i) = filtfilt(b2, a2, filtered_data(:,i));
+    
+%     % IIR notch filters in series (need to design a single faster IIR)
+%     for Iharm = 0.36:0.36:60 %Filter harmonics up to 60Hz
+%         [b, a] = butter(3,[(Iharm-0.05) (Iharm+0.05)]/(fs/2), 'stop');
+%         filtered_data(:,i) = filter(b,a,filtered_data(:,i));  %apply the filter onto the previous output
+%     end
+
+    
+    % IIR Butterworth Filters
+    %filtered_data(:,i) = filtfilt(b_iir, a_iir, filtered_data(:,i));
+    
+    % FIR Kaiser Harmonic Filter
+    %filtered_data(:,i) = filter(hh, 1, filtered_data(:,i));
+    
+    filtered_data(:,i) = 1e6*filtered_data(:,i);
+end
+%% Power Spectrum Density (Before Harmonic Filtering)
+figure('Name','Pre-Filter')
+for i = 24:height(channel_name)
+    %subplot(ceil(height(channel_name)/4),4,i-20+1)
+    subplot(3,3,i-24+1)
+    [freq(:,i), psdx(:,i)] = plot_psd(filtered_data(:,i+1), fs, (title_label(i,1)));
+    
+    % Find Harmonic Series 
+    X = log(psdx(:,i));
+    [pk_filter(:,i), loc_filter(:,i)] =findpeaks(X,'MinPeakDistance',fs/10, 'NPeaks', 400);
+end
+
+%% Filter for each channel with Harmonic Series 
+% %Design FIR Harmonic Filter (Artifact Removal)
+for channel = 1:width(filtered_data) -1
+    for i = 1:length(loc_filter) 
+        if loc_filter(i,channel) == 0
+            F(i) = 60;
+        else
+            F(i) = freq(loc_filter(i,channel),channel);
+        end
+    end
+
+    % IIR notch filters in series (need to design a single faster IIR)
+    for Iharm = 3:100 %Filter harmonics up to 60Hz
+        [b, a] = butter(3,[F(Iharm)-0.05 F(Iharm)+0.05]/(fs/2), 'stop');
+        filtered_data(:,channel) = filter(b,a,filtered_data(:,channel));  %apply the filter onto the previous output
+    end
+end
+
+%% Noise Filter
+for channel = 1:width(filtered_data) - 1
+    n_samples = ceil(std(filtered_data(:,channel))*3);
+    %filtered_data(:,channel) = movmean(filtered_data(:,channel),n_samples);
+    w = gausswin(n_samples, 2.5);
+    w = w/sum(w);
+    filtered_data(:,channel) = filter(w, 1, filtered_data(:,channel));
+end
+
+%% Power Spectrum Density (After Harmonic Filtering)
+figure('Name','Post-Filter')
+for i = 24:height(channel_name)
+    %subplot(ceil(height(channel_name)/4),4,i-20+1)
+    subplot(3,3,i-24+1)
+    [freq_f(:,i), psdx_f(:,i)] = plot_psd(filtered_data(:,i+1), fs, (title_label(i,1)));    
+end
+
+%% Plot Sample Data
+channel = 32;
+triggerdelay = ;
+figure
+subplot(2,1,1)
+plot(time*1e-3,filtered_data(:,32));
+hold on
+plot(time*1e-3 - triggerdelay,data(:,58)*max(filtered_data(:,channel)),'r','LineWidth',1);
+hold off
+xlabel('Time (s)')
+ylabel('Amplitude (uV)')
+axis([10 25 -inf inf])
+subplot(2,1,2)
+plot([-500:1000/fs:500],epochs{channel})
+xlabel('Time (s)')
+ylabel('Amplitude (uV)')
+axis([-inf inf -50 50])
+xline(-triggerdelay, '--','LineWidth', 2)
+%% Extract Epochs
+
+epochs = extract_epochs(filtered_data, fs, data);
+
+figure('Name','Epochs (Time Domain)')
+for i = 24:height(channel_name)
+    subplot(3,3,(i-24)+1)
+    plot_epochs(epochs{i},title_label(i),fs)
+    %plot_scalogram_epoch(epochs{i}, title_label(i), fs)
+end
+
+figure('Name','Epochs (Frequency Domain)')
+for i = 24:height(channel_name)
+    subplot(3,3,(i-24)+1)
+    plot_scalogram_epoch(epochs{i}, title_label(i), fs)
+end
+
+%% Functions
+function plot_scalogram_epoch(data, name, fs)
+    x = mean(data');
+    %x = data(:,30);
+    t = [-500:1000/fs:500];
+    [cfs,f] = cwt(x,'amor',fs);
+    x = 10*abs(cfs);
+    %p = pcolor(rot90(rot90(x)));
+    %shading interp
+    %set(gca, 'YTickLabel', [0:5:length(f)])
+    %set(gca, 'XTickLabel', t)
+    p = image("XData",t,"YData",f,"CData",10*(abs(cfs)),"CDataMapping","scaled");  
+    rectangle('Position',[-100 0 500 2], 'FaceColor',[0.3010 0.7450 0.9330])
+    set(gca,'FontSize', 14, 'LineWidth', 1)
+    axis([-inf inf 0 60])
+    xlabel("Time (ms)")
+    ylabel("Frequency (Hz)")
+    xline(-300, 'r--','LineWidth', 2)
+    hcb=colorbar;
+    hcb.Title.String = "Power (dB)";
+    colormap turbo
+    axis([-inf inf 0 60])
+    %caxis([0 20])
+    %caxis([-5 80])
+    title(name)
+end
+
+function plot_epochs(ep,name, fs)
+    y = (mean(ep'));
+    %y = ep(:,30);
+    %y = 1e6*(ep - mean(ep')');
+    x = [-500:1000/fs:500];
+    %std_dev = std(ep');
+    %curve1 = y' + std_dev;
+    %curve2 = y' - std_dev;
+    %x2 = [x, fliplr(x)];
+    %inBetween = [curve1, fliplr(curve2)];
+    %fill(x2, inBetween, 'k', 'FaceAlpha', 0.1);
+    hold on;
+    plot(x, y, 'r', 'LineWidth', 1.5);
+    %axis([-inf inf -max(abs(curve2))-1 max(abs(curve1)) + 1])
+    %rectangle('Position',[-100 min(curve2)-1 500 1], 'FaceColor',[0.3010 0.7450 0.9330])
+    %axis([-inf inf -5 5])
+    %rectangle('Position',[-100 -5 500 1], 'FaceColor',[0.3010 0.7450 0.9330])
+    axis([-inf inf -abs(min(y)+ 0.5*min(y)) abs(max(y)+0.5*abs(min(y)))])
+    rectangle('Position',[-100 -abs(min(y)+ 0.5*min(y)) 500 0.1*abs(min(y)+ 0.5*min(y))], 'FaceColor',[0.3010 0.7450 0.9330])
+    xline(-300, '--','LineWidth', 2)
+    yline(0, '--','LineWidth', 2)
+    ylabel('EEG Amplitude (uV)')
+    xlabel('Time (ms)')
+    title(name)
+    set(gca,'FontSize', 14, 'LineWidth', 1)
+end
+
+function epochs = extract_epochs(filtered_data, fs, epoch_triggers)
+    LB = 500;
+    UB = 500;
+    [pks, locs] = findpeaks(epoch_triggers(:,58));
+    for k = 1:width(filtered_data) - 1
+        for i = 1:length(locs)
+            epochs{k}(:,i) = filtered_data(locs(i)-(LB/(1/fs)/1000):locs(i)+(UB/(1/fs)/1000),k);
+        end
+    end
+end
+
+function [freq, psdx] = plot_psd(data, fs, channel)
+    T = 1/fs;             % Sampling period       
+    L = length(data);             % Length of signal
+    t = (0:L-1)*T;        % Time vector
+    X = data;
+
+    % Convert FFT to PSD
+    xdft = fft(X);
+    xdft = xdft(1:floor(L/2+1));
+    psdx = (1/(fs*L)) * abs(xdft).^2;
+    psdx(2:end-1) = 2*psdx(2:end-1);
+    freq = 0:fs/L:fs/2;
+    
+    loglog(freq,psdx, 'LineWidth', 1.5) 
+    %semilogy(freq,psdx, 'LineWidth', 1.5) 
+    title(channel)
+    xlabel("f (Hz)")
+    ylabel("PSD (\muV^2 Hz^{-1})")
+    axis([1 100 -inf inf])
+    set(gca,'FontSize', 14, 'LineWidth', 1)
+end
+
+function data = importfile(filename, dataLines)
+    %IMPORTFILE Import data from a text file
+    %  data = IMPORTFILE(FILENAME) reads data from text file FILENAME
+    %  for the default selection.  Returns the data as a table.
+    %
+    %  data = IMPORTFILE(FILE, DATALINES) reads data for the specified
+    %  row interval(s) of text file FILENAME. Specify DATALINES as a
+    %  positive scalar integer or a N-by-2 array of positive scalar integers
+    %  for dis-contiguous row intervals.
+    %
+    %  Example:
+    %  data = importfile("/Users/KevinTang/Desktop/UTAustin/Code/GitHub/labstreaminglayer/Code/Rehamove3/Data Analysis/Data/JJ_tFUS_80.csv", [2, Inf]);
+    %
+    %  See also READTABLE.
+    %
+    % Auto-generated by MATLAB on 07-Aug-2023 14:04:26
+
+    % Input handling
+
+    % If dataLines is not specified, define defaults
+    if nargin < 2
+        dataLines = [2, Inf];
+    end
+
+    % Set up the Import Options and import the data
+    opts = delimitedTextImportOptions("NumVariables", 59);
+
+    % Specify range and delimiter
+    opts.DataLines = dataLines;
+    opts.Delimiter = [" ", "["];
+
+    % Specify column names and types
+    opts.VariableNames = ["VarName1", "VarName2", "VarName3", "VarName4", "VarName5", "VarName6", "VarName7", "VarName8", "VarName9", "VarName10", "VarName11", "VarName12", "VarName13", "VarName14", "VarName15", "VarName16", "VarName17", "VarName18", "VarName19", "VarName20", "VarName21", "VarName22", "VarName23", "VarName24", "VarName25", "VarName26", "VarName27", "VarName28", "VarName29", "VarName30", "VarName31", "VarName32", "VarName33", "VarName34", "VarName35", "VarName36", "VarName37", "VarName38", "VarName39", "VarName40", "VarName41", "VarName42", "VarName43", "VarName44", "VarName45", "VarName46", "VarName47", "VarName48", "VarName49", "VarName50", "VarName51", "VarName52", "VarName53", "VarName54", "VarName55", "VarName56", "VarName57", "VarName58", "VarName59"];
+    opts.VariableTypes = ["double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double"];
+
+    % Specify file level properties
+    opts.ExtraColumnsRule = "ignore";
+    opts.EmptyLineRule = "read";
+    opts.ConsecutiveDelimitersRule = "join";
+
+    % Specify variable properties
+    opts = setvaropts(opts, ["VarName1", "VarName2", "VarName3", "VarName4", "VarName5", "VarName6", "VarName7", "VarName8", "VarName9", "VarName10", "VarName11", "VarName12", "VarName13", "VarName14", "VarName15", "VarName16", "VarName17", "VarName18", "VarName19", "VarName20", "VarName21", "VarName22", "VarName23", "VarName24", "VarName25", "VarName26", "VarName27", "VarName28", "VarName29", "VarName30", "VarName31", "VarName32", "VarName33", "VarName34", "VarName35", "VarName36", "VarName37", "VarName38", "VarName39", "VarName40", "VarName41", "VarName42", "VarName43", "VarName44", "VarName45", "VarName46", "VarName47", "VarName48", "VarName49", "VarName50", "VarName51", "VarName52", "VarName53", "VarName54", "VarName55", "VarName56", "VarName57", "VarName58", "VarName59"], "TrimNonNumeric", true);
+    opts = setvaropts(opts, ["VarName1", "VarName2", "VarName3", "VarName4", "VarName5", "VarName6", "VarName7", "VarName8", "VarName9", "VarName10", "VarName11", "VarName12", "VarName13", "VarName14", "VarName15", "VarName16", "VarName17", "VarName18", "VarName19", "VarName20", "VarName21", "VarName22", "VarName23", "VarName24", "VarName25", "VarName26", "VarName27", "VarName28", "VarName29", "VarName30", "VarName31", "VarName32", "VarName33", "VarName34", "VarName35", "VarName36", "VarName37", "VarName38", "VarName39", "VarName40", "VarName41", "VarName42", "VarName43", "VarName44", "VarName45", "VarName46", "VarName47", "VarName48", "VarName49", "VarName50", "VarName51", "VarName52", "VarName53", "VarName54", "VarName55", "VarName56", "VarName57", "VarName58", "VarName59"], "ThousandsSeparator", ",");
+
+    % Import the data
+    data = readtable(filename, opts);
+
+end

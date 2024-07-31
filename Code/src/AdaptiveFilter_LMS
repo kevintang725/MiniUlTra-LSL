@@ -1,0 +1,138 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+from tqdm import tqdm
+from scipy.signal import butter, filtfilt
+import padasip as pa
+
+# Functions
+class Data_Properties():
+    def __init__(self):
+        self.time = []
+        self.y_DC = []
+        self.trigger = []
+        self.FFT = []
+        self.freq = []
+
+def butter_highpass_filter(data, cutoff, fs, order):
+    normal_cutoff = cutoff / (0.5*fs)
+    # Get the filter coefficients 
+    b, a = butter(order, normal_cutoff, btype='high', analog=False)
+    y = filtfilt(b, a, data)
+    return y
+
+def butter_lowpass_filter(data, cutoff, fs, order):
+    normal_cutoff = cutoff / (0.5*fs)
+    # Get the filter coefficients 
+    b, a = butter(order, normal_cutoff, btype='low', analog=False)
+    y = filtfilt(b, a, data)
+    return y
+
+def linear_interpolation(x1, y1, x2, y2):
+    output = y1 + (x2 - x1)*((y2 - y1)/(x2 - x1))
+    return output
+
+def read_file(pathfile,fs):
+    fc1 = 5      # desired cutoff frequency of the filter, Hz 
+    fc2 = 200      # desired cutoff frequency of the filter, Hz 
+    order = 2       # sin wave can be approx represented as quadratic
+
+    channel_sel = 1
+
+    df = pd.read_csv(pathfile)
+
+    # Initialize Vectors
+    time = []
+    data = []
+
+    # Define signal of interest in time
+    start = 10000
+    stop = start + 20000
+    step = 1
+
+    # Reformat and Clean Data to Float Array
+    for i in tqdm(range(start,stop,step)):
+    # Convert to numpy format
+        df_numpy = df.to_numpy()
+
+        data_string_array = df_numpy[i,2]   # Access individual data string per time index
+        data_string_array = (data_string_array[1:-1].split(','))  # Split data string to list
+        float_array = [float(string) for string in data_string_array]    # Convert data string list to data float list
+        data.append(np.array(float_array))  # Re-format as numpy array for data
+        time.append(np.array(float(df_numpy[i,1]))) # Re-format as numpy array for time
+
+    # Package data for processing
+    D = np.array(data)
+    trigger = D[:,56]   # Trigger Channel 56
+    data = 1e6*D # Convert to uV
+    time = np.array(time) - min(time)
+
+    # Filter DC Bias
+    y_DC = butter_highpass_filter(data[:,channel_sel], fc1, fs, order)
+    y_DC = butter_lowpass_filter(y_DC, fc2, fs, order)
+
+    # Calculate PSD
+    FFT = np.fft.fft(y_DC)
+    freq = np.fft.fftfreq(time.shape[-1])
+
+    return time, y_DC, trigger, FFT, freq
+
+# Filter requirements.
+fs = 512       # sample rate, Hz
+
+# Read CSV as Dataframe
+control = "/Users/KevinTang/Desktop/UTAustin/Code/GitHub/Human Trials/FUS + EEG (SEP)/JL_08172023/JL_FUS-FES-_1.csv"
+NG1 = "/Users/KevinTang/Desktop/UTAustin/Code/GitHub/Human Trials/FUS + EEG (SEP)/JL_08172023/JL_FUS+FES-_1_.csv"
+NG2 = "/Users/KevinTang/Desktop/UTAustin/Code/GitHub/Human Trials/FUS + EEG (SEP)/JL_08172023/JL_FUS+FES+_1.csv"
+
+# Initialize Classes
+CTRL = Data_Properties()
+TRAIN = Data_Properties()
+VAL = Data_Properties()
+
+# Analyze
+CTRL.time, CTRL.y_DC, CTRL.trigger, CTRL.FFT, CTRL.freq = read_file(control, fs)
+TRAIN.time, TRAIN.y_DC, TRAIN.trigger, TRAIN.FFT, TRAIN.freq = read_file(NG1, fs)
+VAL.time, VAL.y_DC, VAL.trigger, VAL.FFT, VAL.freq = read_file(NG2, fs)
+
+## Adaptive Filter LMS
+x = np.transpose(np.array([TRAIN.y_DC]))
+d = CTRL.y_DC
+f = pa.filters.FilterNLMS(n=1, mu=1, w="random")
+y, e, w = f.run(d, x)
+
+## Apply Adaptive Filter LMS to validation 
+x_v = (np.array([VAL.y_DC]))
+y_v = f.predict(x_v)
+
+# Evaluate Ad-Hoc ADP_NLMS Filter
+plt.figure(figsize=(15,9))
+
+plt.subplot(1,2,1)
+plt.plot(TRAIN.time, TRAIN.y_DC,"b", label="FUS Contaminated Signal")
+plt.plot(CTRL.time, y,"r", label="Adaptive Filtered Signal (Training)")
+plt.plot(VAL.time, y_v,"g", label="Adaptive Filtered Signal (Validation)")
+plt.legend()
+plt.xlabel('Time (s)')
+plt.ylabel('Voltage (uV)')
+plt.title('Adaptive Filter')
+
+plt.subplot(1,2,2)
+plt.loglog(fs*TRAIN.freq[0:math.floor(len(TRAIN.freq)/2)], abs(TRAIN.FFT[0:math.floor(len(TRAIN.FFT)/2)]),"b", label="FUS Contaminated Signal")
+plt.loglog(fs*CTRL.freq[0:math.floor(len(CTRL.freq)/2)], abs(y[0:math.floor(len(y)/2)]),"r", label="Adaptive Filtered Signal (Training)")
+plt.loglog(fs*VAL.freq[0:math.floor(len(CTRL.freq)/2)], abs(y_v[0:math.floor(len(y_v)/2)]),"g", label="Adaptive Filtered Signal (Validation)")
+plt.legend()
+plt.xlabel('Frequency (Hz)')
+plt.ylabel('PSD ($uV^{2}$ $Hz^{-1}$)')
+plt.xlim([1, 100])
+plt.title('PSD')
+
+
+#plt.subplot(2,2,4);plt.title("Filter error");plt.xlabel("samples - k")
+#plt.plot(10*np.log10(e**2),"r", label="e - error [dB]");plt.legend()
+# Use
+plt.show()
+
+
+

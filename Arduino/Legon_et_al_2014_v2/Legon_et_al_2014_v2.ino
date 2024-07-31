@@ -58,7 +58,6 @@ void loop()
     }
   }
 
-  elapsed_pulse_duration = micros();
 
   while (start_flag == 1){
       elapsed_pulse_duration = micros() - elapsed_pulse_duration;
@@ -80,8 +79,18 @@ void loop()
       Serial.print("11");
       Serial.print('\n');
 
+<<<<<<< HEAD
+<<<<<<< Updated upstream
       // Wait for elapsed remaining ON cycle
       delay(stimulation_period - FES_delay);
+=======
+      // Wait for elapsed remaining ON duration
+      delay(rest_period - FES_delay);
+>>>>>>> Stashed changes
+=======
+      // Wait for elapsed remaining ON cycle
+      delay(stimulation_period - FES_delay);
+>>>>>>> main
 
       // Pulse Trigger OFF for FUS+FES
       digitalWrite(triggerPin_FUS, LOW);  
