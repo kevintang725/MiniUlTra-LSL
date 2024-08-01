@@ -23,11 +23,14 @@ Windows 10 or 11, Mac OS Monterey 12 or above.
 
 ### Software Dependencies
 1.) Anaconda Environment
+
 2.) Python 3.8.3
+
 3.) pylsl 1.16.1
 
 ### Additional Hardwares
 1.) Rehamove 3, Hasomed
+
 2.) Arduino Uno
 
 ## Installation Guide
