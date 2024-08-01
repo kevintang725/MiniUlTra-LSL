@@ -57,11 +57,11 @@ Time required to download repository (~2-5min)
 Run Main.py in terminal
 If Arduino and Rehamove3 is not connected or detected shown below, check COM ports and modify Main.py script to the correct corresponding COM ports.
 
-![image](https://github.com/user-attachments/assets/48409f9f-b201-43d2-af29-9af780b4586c)
+<img width="610" alt="Screen Shot 2024-08-01 at 3 09 14 PM" src="https://github.com/user-attachments/assets/1e925231-f3ec-4a20-9b08-ae16a46fa246">
 
 If Rehamove 3 is not connected, the software will send trigger but each pulse will output "ERROR1 Rehamove object does not exist"
 
-![image](https://github.com/user-attachments/assets/4b83c213-b863-478c-bdb4-f084b1e1290e)
+<img width="753" alt="Screen Shot 2024-08-01 at 3 09 49 PM" src="https://github.com/user-attachments/assets/93267f60-91c9-4c27-8e37-64b7ecb8c5ed">
 
 To run Lab Streaming Layer in recording data, run ReceiveData.py in terminal
 
